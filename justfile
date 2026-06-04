@@ -14,19 +14,16 @@ build:
 # Build, then install on every connected device
 install: build install-only
 
-# Install the already-built APK on every connected device, in parallel
+# Install the already-built APK on every connected device, one at a time
 install-only:
     #!/usr/bin/env bash
     set -uo pipefail
     serials=$(adb devices | awk 'NR > 1 && $2 == "device" { print $1 }')
     [ -n "$serials" ] || { echo "no devices connected" >&2; exit 1; }
-    pids=()
-    for s in $serials; do
-        ( out=$(adb -s "$s" install -r "{{apk}}" 2>&1) && echo "✓ $s" || { echo "✗ $s: $out" >&2; exit 1; } ) &
-        pids+=($!)
-    done
     failed=0
-    for p in "${pids[@]}"; do wait "$p" || failed=1; done
+    for s in $serials; do
+        out=$(adb -s "$s" install -r "{{apk}}" 2>&1) && echo "✓ $s" || { echo "✗ $s: $out" >&2; failed=1; }
+    done
     exit $failed
 
 # Install and open the app on every connected device
