@@ -14,14 +14,10 @@ A single text box. Open it, write, leave. Whatever is there is what you'll see n
 
 ## Build & install
 
-Needs [`just`](https://github.com/casey/just) and `adb`. Every recipe that installs targets **all**
-connected devices.
+Needs [`just`](https://github.com/casey/just) and `adb`.
 
 ```sh
-just install        # build the release APK and install it on every connected phone
-just install-only   # install the already-built APK without rebuilding
-just run            # install, then open the app on every phone
-just uninstall      # remove it from every phone
+just android        # build the release APK and install it on every connected phone
 ```
 
 The release build is signed with the debug key so it installs as-is
