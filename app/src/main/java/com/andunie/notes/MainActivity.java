@@ -29,6 +29,7 @@ public class MainActivity extends Activity {
         input.setTextSize(18);
         input.setGravity(Gravity.TOP | Gravity.START);
         input.setBackground(null);
+        input.setPadding(pad, pad, pad, pad);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
                 | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         input.setText(prefs.getString("text", ""));
