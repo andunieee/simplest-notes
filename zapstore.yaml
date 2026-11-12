@@ -1,0 +1,16 @@
+# Zapstore listing for the Android build. Published by the "Publish to Zapstore"
+# step in .github/workflows/release.yml after the APK is attached to the release.
+repository: https://github.com/andunieee/simplest-notes
+release_filter: '^v[0-9]+\.[0-9]+(\.[0-9]+)?$'
+match: '^simplest-notes-.*\.apk$'
+
+name: Simplest Notes
+summary: A single text box for writing anything, blazingly fast to open.
+description: |
+  **Simplest Notes** is a single text box for writing anything, blazingly fast
+  to open. There are no notebooks, folders, or sync prompts: open the app and
+  your text is already there, saved as you type.
+website: https://github.com/andunieee/simplest-notes
+tags: [notes, notepad, writing, text]
+icon: ./art/icon.png
+metadata_sources: [github]

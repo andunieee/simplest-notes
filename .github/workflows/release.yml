@@ -38,6 +38,19 @@ jobs:
             -storepass "$ANDROID_KEYSTORE_PASSWORD" > /dev/null
           echo "ANDROID_KEYSTORE=$keystore" >> "$GITHUB_ENV"
 
+      - name: Derive version from tag
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if [[ "$version" =~ ^([0-9]+)\.([0-9]+)(\.([0-9]+))?$ ]]; then
+            major=$((10#${BASH_REMATCH[1]}))
+            minor=$((10#${BASH_REMATCH[2]}))
+            patch=$((10#${BASH_REMATCH[4]:-0}))
+            echo "ANDROID_VERSION_NAME=$version" >> "$GITHUB_ENV"
+            echo "ANDROID_VERSION_CODE=$((major * 10000 + minor * 100 + patch))" >> "$GITHUB_ENV"
+          else
+            echo "::warning::tag $GITHUB_REF_NAME is not v<major>.<minor>[.<patch>]; using the default version"
+          fi
+
       - name: Build release APK
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -55,3 +68,30 @@ jobs:
             --title "Simplest Notes $GITHUB_REF_NAME" \
             --generate-notes \
             --verify-tag
+
+      - uses: actions/setup-go@v5
+        if: github.ref_type == 'tag'
+        with:
+          go-version-file: packaging/zapstore/go.mod
+          cache-dependency-path: packaging/zapstore/go.sum
+
+      - name: Publish to Zapstore
+        if: github.ref_type == 'tag'
+        env:
+          SIGN_WITH: ${{ secrets.ZAPSTORE_OWNER_NSEC }}
+          GITHUB_TOKEN: ${{ github.token }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SIGN_WITH}" ]; then
+            echo "::warning::ZAPSTORE_OWNER_NSEC is not set, skipping the Zapstore publish"
+            exit 0
+          fi
+          if [ -z "${ANDROID_KEYSTORE:-}" ]; then
+            echo "::warning::the release keystore is not configured, skipping the Zapstore publish"
+            exit 0
+          fi
+          (cd packaging/zapstore && go build -o "${RUNNER_TEMP}/zapstore" .)
+          "${RUNNER_TEMP}/zapstore"

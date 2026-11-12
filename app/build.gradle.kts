@@ -28,8 +28,9 @@ android {
         applicationId = "com.andunie.notes"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        // The release workflow derives these from a v<major>.<minor>[.<patch>] tag.
+        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull() ?: 1
+        versionName = System.getenv("ANDROID_VERSION_NAME") ?: "1.0"
     }
 
     signingConfigs {
